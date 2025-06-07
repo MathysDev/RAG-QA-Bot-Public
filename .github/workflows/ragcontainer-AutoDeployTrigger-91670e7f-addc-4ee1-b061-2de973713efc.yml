@@ -1,0 +1,56 @@
+name: Trigger auto deployment for ragcontainer
+
+# When this action will be executed
+on:
+  # Automatically trigger it when detected changes in repo
+  push:
+    branches: 
+      [ main ]
+    paths:
+    - '**'
+    - '.github/workflows/ragcontainer-AutoDeployTrigger-91670e7f-addc-4ee1-b061-2de973713efc.yml'
+
+  # Allow manual trigger 
+  workflow_dispatch:      
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    permissions: 
+      id-token: write #This is required for requesting the OIDC JWT Token
+      contents: read #Required when GH token is used to authenticate with private repo
+
+    steps:
+      - name: Checkout to the branch
+        uses: actions/checkout@v2
+
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          client-id: ${{ secrets.RAGCONTAINER_AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.RAGCONTAINER_AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.RAGCONTAINER_AZURE_SUBSCRIPTION_ID }}
+
+
+      - name: Build Docker image
+        run: |
+          docker build -t mathysdev.azurecr.io/ragcontainer:${{ github.sha }} .
+
+      - name: Login to Azure Container Registry
+        run: |
+          echo "${{ secrets.RAGCONTAINER_REGISTRY_PASSWORD }}" | docker login mathysdev.azurecr.io -u ${{ secrets.RAGCONTAINER_REGISTRY_USERNAME }} --password-stdin
+
+      - name: Push Docker image to ACR
+        run: |
+          docker push mathysdev.azurecr.io/ragcontainer:${{ github.sha }}
+
+      - name: Deploy to Azure Container App
+        uses: azure/cli@v1
+        with:
+          inlineScript: |
+            az containerapp update \
+              --name ragcontainer \
+              --resource-group RAGBot \
+              --image mathysdev.azurecr.io/ragcontainer:${{ github.sha }} \
+              --container-name ragcontainer 
+

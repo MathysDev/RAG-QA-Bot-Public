@@ -1,0 +1,8 @@
+Django>=3.2,<4.0
+requests
+langchain_community
+torch
+faiss-gpu
+unstructured
+sentence_transformers
+faiss-cpu

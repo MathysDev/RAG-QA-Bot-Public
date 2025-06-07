@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Steuerung - Verarbeitungen</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        body {
+            background: #f4f6fb;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 500px;
+            margin: 40px auto;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            padding: 32px 24px;
+        }
+        h2 {
+            margin-top: 0;
+            color: #2d3a4b;
+            font-weight: 600;
+            font-size: 1.6em;
+        }
+        .control-section {
+            margin-top: 32px;
+        }
+        .btn {
+            background: #2563eb;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            padding: 12px 28px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .btn:hover {
+            background: #1e40af;
+        }
+        .status {
+            margin-top: 18px;
+            color: #2563eb;
+            font-size: 1em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Steuerung der Verarbeitungen</h2>
+        <div class="control-section">
+            <form method="post" action="{{ url_for('recompute_embeddings') }}">
+                <button class="btn" type="submit">Embeddings neu berechnen</button>
+            </form>
+            {% if status_message %}
+                <div class="status">{{ status_message }}</div>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>
